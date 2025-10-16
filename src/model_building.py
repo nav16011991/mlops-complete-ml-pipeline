@@ -1,4 +1,5 @@
 import os
+import yaml
 import logging
 import numpy as np
 import pandas as pd
@@ -30,6 +31,31 @@ logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 logger.propagate = False
 logger.debug(f"Process started with PID: {os.getpid()}")
+
+def load_params(config_path: str) -> dict:
+    """
+    Load parameters from a YAML configuration file.
+
+    Args:
+        config_path (str): The path to the YAML configuration file.
+    Returns:
+        dict: The parameters loaded from the YAML file.
+    """
+    try:
+        with open(config_path, 'r') as file:
+            params = yaml.safe_load(file)
+            logger.debug(f"Parameters loaded successfully from {config_path}")
+            return params
+    except FileNotFoundError as e:
+        logger.error(f"Configuration file not found: {e}")
+        raise
+    except yaml.YAMLError as e:
+        logger.error(f"Error parsing YAML file: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error loading parameters: {e}")
+        raise
+
 
 def load_data(file_path: str) -> pd.DataFrame:
     """
@@ -114,10 +140,12 @@ def main():
     """
     try:
         # Define model parameters
-        params = {
-            'n_estimators': 100,
-            'random_state': 42
-        }
+        # params = {
+        #     'n_estimators': 100,
+        #     'random_state': 42
+        # }
+
+        params = load_params("params.yaml")['model_building']
         
         # Load the training data
         train_data_path = "./data/processed/train_vectorized.csv"

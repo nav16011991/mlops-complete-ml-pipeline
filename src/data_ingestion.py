@@ -1,3 +1,4 @@
+import yaml
 import pandas as pd
 import os
 import logging
@@ -24,6 +25,30 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+def load_params(config_path: str) -> dict:
+    """
+    Load parameters from a YAML configuration file.
+
+    Args:
+        config_path (str): The path to the YAML configuration file.
+    Returns:
+        dict: The parameters loaded from the YAML file.
+    """
+    try:
+        with open(config_path, 'r') as file:
+            params = yaml.safe_load(file)
+            logger.debug(f"Parameters loaded successfully from {config_path}")
+            return params
+    except FileNotFoundError as e:
+        logger.error(f"Configuration file not found: {e}")
+        raise
+    except yaml.YAMLError as e:
+        logger.error(f"Error parsing YAML file: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error loading parameters: {e}")
+        raise
 
 def load_data(data_url: str) -> pd.DataFrame:
     """
@@ -94,7 +119,10 @@ def save_data( train_data: pd.DataFrame, test_data: pd.DataFrame, data_path: str
 
 def main():
     try:
-        test_size = 0.2
+        #test_size = 0.2
+        params = load_params("params.yaml")
+        test_size = params['data_ingestion']['test_size']
+
         data_url = "https://raw.githubusercontent.com/nav16011991/mlops-complete-ml-pipeline/refs/heads/main/experiments/spam.csv"
         data_path = "./data"
         # Load data

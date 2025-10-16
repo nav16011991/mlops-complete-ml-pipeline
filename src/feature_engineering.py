@@ -1,3 +1,4 @@
+import yaml
 import pandas as pd
 import os
 import logging
@@ -23,6 +24,31 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+def load_params(config_path: str) -> dict:
+    """
+    Load parameters from a YAML configuration file.
+
+    Args:
+        config_path (str): The path to the YAML configuration file.
+    Returns:
+        dict: The parameters loaded from the YAML file.
+    """
+    try:
+        with open(config_path, 'r') as file:
+            params = yaml.safe_load(file)
+            logger.debug(f"Parameters loaded successfully from {config_path}")
+            return params
+    except FileNotFoundError as e:
+        logger.error(f"Configuration file not found: {e}")
+        raise
+    except yaml.YAMLError as e:
+        logger.error(f"Error parsing YAML file: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error loading parameters: {e}")
+        raise
+
 
 def load_data(data_url: str) -> pd.DataFrame:
     """
@@ -109,7 +135,11 @@ def main():
         logger.debug("Data loaded properly")
 
         # Apply TF-IDF vectorization
-        max_features = 50  # You can adjust this value as needed
+        # max_features = 50  # You can adjust this value as needed
+
+        params = load_params("params.yaml")
+        max_features = params['feature_engineering']['max_features']
+
         train_vectorized, test_vectorized = apply_tfidf_vectorization(train_data, test_data, max_features)
 
         # Store the vectorized data inside data/processed
