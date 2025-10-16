@@ -5,6 +5,8 @@ import pandas as pd
 import pickle
 import json
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+import yaml
+from dvclive import Live
 
 # Ensuring the logs directory exists
 logs_dir = "logs"
@@ -31,6 +33,31 @@ logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 logger.propagate = False
 logger.debug(f"Process started with PID: {os.getpid()}")
+
+def load_params(config_path: str) -> dict:
+    """
+    Load parameters from a YAML configuration file.
+
+    Args:
+        config_path (str): The path to the YAML configuration file.
+    Returns:
+        dict: The parameters loaded from the YAML file.
+    """
+    try:
+        with open(config_path, 'r') as file:
+            params = yaml.safe_load(file)
+            logger.debug(f"Parameters loaded successfully from {config_path}")
+            return params
+    except FileNotFoundError as e:
+        logger.error(f"Configuration file not found: {e}")
+        raise
+    except yaml.YAMLError as e:
+        logger.error(f"Error parsing YAML file: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error loading parameters: {e}")
+        raise
+
 
 def load_model(model_path: str):
     """
@@ -107,6 +134,8 @@ def main():
     Main function to load the model, evaluate it on test data, and save the metrics.
     """
     try:
+        params = load_params("params.yaml")
+
         # Paths (these would typically come from a config file or environment variables)
         model_path = "models/random_forest_model.pkl"
         test_data_path = "data/processed/test_vectorized.csv"
@@ -124,6 +153,13 @@ def main():
         # Evaluate the model
         metrics = evaluate_model(model, X_test, y_test)
 
+        # Experiment tracking with dvclive
+        with Live(save_dvc_exp=True) as live:
+            for metric_name, metric_value in metrics.items():
+                live.log_metric(metric_name, metric_value)
+                logger.debug(f"Logged {metric_name}: {metric_value} to dvclive")
+            live.log_params(params)
+            logger.debug("Logged model parameters to dvclive")
         # Save the evaluation metrics
         save_metrics(metrics, metrics_output_path)
 
