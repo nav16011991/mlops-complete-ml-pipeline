@@ -95,7 +95,7 @@ def save_data( train_data: pd.DataFrame, test_data: pd.DataFrame, data_path: str
 def main():
     try:
         test_size = 0.2
-        data_url = "https://raw.githubusercontent.com/vikashishere/YT-MLOPS-Complete-ML-Pipeline/refs/heads/main/experiments/spam.csv"
+        data_url = "https://raw.githubusercontent.com/nav16011991/mlops-complete-ml-pipeline/refs/heads/main/experiments/spam.csv"
         data_path = "./data"
         # Load data
         df = load_data(data_url)

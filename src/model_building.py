@@ -15,7 +15,7 @@ logger.setLevel(logging.DEBUG)
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)
 
-log_file_path = os.path.join(logs_dir, "model_training.log")
+log_file_path = os.path.join(logs_dir, "model_building.log")
 file_handler = logging.FileHandler(log_file_path)
 file_handler.setLevel(logging.DEBUG)
 
