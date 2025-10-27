@@ -209,3 +209,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+mlops-admin_credentials.csv
+mlops-admin_accessKeys.csv
